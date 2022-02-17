@@ -30,4 +30,13 @@ class Persona(metaclass=ABCMeta):
         print('la persona sta camminando')
         
     def dorme(self):
-        print('la persona sta dormendo')    
+        print('la persona sta dormendo')  
+        
+    def __str__(self):
+        return str(self._nome) + ' ' + str(self._cognome) + ' ' + str(self._data_nascita) 
+    
+    def __eq__(self,other):
+        if isinstance(other):
+            if other._nome==self._nome and other._cognome==self._cognome and other._data_nascita==self._data_nascita:
+                return True
+            return False 
