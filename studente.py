@@ -82,6 +82,8 @@ class Studente(Persona):
         self._corso_di_studio = corso_di_studio
         self._alchool = alchool
         self._esami = esami
+        logger.info(f"Studente {self._nome} {self._cognome}, matricola {self._matricola}, iscritto al corso di studio "
+                    f"{self._corso_di_studio}")
 
     def __eq__(self, other):
         """
@@ -92,8 +94,8 @@ class Studente(Persona):
         return True if self._matricola == other.matricola else False
 
     def __str__(self):
-        return str(f"Studente {self._nome} {self._cognome}, matricola {self._matricola}, iscritto al corso di studio"
-                   f"{self._corso_di_studio}")
+        return f"Studente {self._nome} {self._cognome}, matricola {self._matricola}, iscritto al corso di studio " \
+               f"{self._corso_di_studio}"
 
     def calcolo_media_esami(self):
         """
