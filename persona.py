@@ -244,7 +244,7 @@ class Studente(Persona):
             assert len(a) == 2
             assert 0 <= a[0] <= 100
 
-        super().__init__(nome, cognome, data_di_nascita, sesso, peso)
+        super().__init__(nome, cognome,sesso,peso,data_di_nascita)
         self._matricola = matricola
         self._corso_di_studio = corso_di_studio
         self._alchool = alchool
@@ -414,3 +414,16 @@ class Check:
         if not isinstance(aumento, int):
             raise ValueError("Aumento deve essere di tipo intero")
         stipendi[mansione][livello] = stipendi[mansione][livello] + aumento
+
+
+
+class Studenteiva (Studente, LavoratorePiva):
+    def __init__(self, nome, cognome, sesso, peso, data_di_nascita, matricola,
+                 corso_di_studio, alchool, esami, idbadge, mansione, tariffa_gg, ore_lavorate):
+        Studente.__init__(self,nome, cognome, sesso, peso, data_di_nascita, matricola,
+                          corso_di_studio, alchool, esami)
+        LavoratorePiva.__init__(self,nome, cognome, sesso, peso, data_di_nascita, idbadge, mansione, tariffa_gg, ore_lavorate)
+        
+
+        
+        
