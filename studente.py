@@ -83,12 +83,32 @@ class Studente(Persona):
         self._alchool = alchool
         self._esami = esami
 
+    def __eq__(self, other):
+        """
+        funziona equal che paragona se due studenti sono uguali usando il numero matricola.
+        :param other: oggetto di tipo persona
+        :return: True se i due oggetti Studente hanno la stessa matricola altrimenti False.
+        """
+        return True if self._matricola == other.matricola else False
+
+    def __str__(self):
+        return str(f"Studente {self._nome} {self._cognome}, matricola {self._matricola}, iscritto al corso di studio"
+                   f"{self._corso_di_studio}")
+
     def calcolo_media_esami(self):
+        """
+        metodo che calcola la media degli esami.
+        :return: ritorna la media degli esami.
+        """
         crediti_totali = sum(map(lambda x: x[0], self._esami.values()))
         media = sum(map(lambda x: x[0] * x[1], self._esami.values())) / crediti_totali
         return media
 
     def calcola_tasso_alcolemico(self):
+        """
+        metodo che calcola il tasso alcolemico.
+        :return: ritornoa il tasso alcolemico.
+        """
         coefficente_difusione = 0.73 if self._sesso else 0.66
         sum_beverage = sum(map(lambda x: x[0] * x[1], self._alchool))
         return sum_beverage * 0.008 * 1.055 / (coefficente_difusione * self._peso)
