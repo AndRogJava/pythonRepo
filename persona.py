@@ -224,6 +224,8 @@ class LavoratorePiva(Lavoratore):
         super().__init__(nome, cognome, data_nascita, sesso, peso, idbadge, mansione, tariffa_gg, ore_lavorate)
         self._tariffa_gg=tariffa_gg
         self._ore_lavorate=ore_lavorate
+        logger.info("E' stato inserito un lavoratore con P.iva.")  
+
           
 
         
