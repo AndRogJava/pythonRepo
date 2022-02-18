@@ -1,7 +1,8 @@
 from abc import ABCMeta, abstractmethod
+import logging
 
-
-from abc import ABCMeta
+logging.basicConfig(filename = 'log_es_persona.log' ,format=' %(levelname)s %(asctime) s %(message)s',level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class Persona(metaclass=ABCMeta):
     def __init__(self,nome, cognome, data_nascita):
@@ -46,8 +47,7 @@ class Lavoratore(Persona, metaclass=ABCMeta):
     
     def __init__(self,nome, cognome, data_nascita, idbadge, mansione):
         super().__init__(nome, cognome, data_nascita)
-        if (len(idbadge) != 8) or (idbadge.isalnum() == False):
-            raise ValueError('Inserire un IBAN valido.')
+        Lavoratore.check_id(idbadge)
         self._idbadge = idbadge
         self._mansione = mansione
         logger.info("E' stato inserito un lavoratore.")  
@@ -68,10 +68,8 @@ class Lavoratore(Persona, metaclass=ABCMeta):
         return self._idbadge
 
     def set_idbadge(self, x):
-        if (len(x)<0) or (len(x)>8) or (x.isalnum() == False):
-            raise('Inserisci un id valido')
-        else:
-            self._idbadge = x
+        Lavoratore.check_id(x)
+        self._idbadge = x
     
     def get_masnione(self):
         return self._mansione
@@ -81,6 +79,14 @@ class Lavoratore(Persona, metaclass=ABCMeta):
             raise('Inserisci una mansione valida')
         else:
             self._mansione = x
+    
+    @staticmethod
+    def check_id(idbadge):
+        if (len(idbadge)<0) or (len(idbadge)>8) or (idbadge.isalnum() == False):
+            raise('Inserisci una id valido.')
+        else:
+            pass
+
 
     @abstractmethod
     def stipendio(self):
