@@ -5,7 +5,7 @@
 
 
 from pickle import FALSE
-from persona import Dipendente, LavoratorePiva, Studente, Check, stipendi
+from persona import Dipendente, LavoratorePiva, Studente, Check, stipendi, Studenteiva
 from datetime import datetime
 
 
@@ -41,4 +41,8 @@ if __name__ == "__main__":
     
     Check.aumento_a_livello('inserviente', 5, 2000)
     print(stipendi)
+    
+
+    obj=Studenteiva('Fabiana', 'Verdi', False, 51, datetime(1995,3,10), 1, 'Filosofia', [(70, 200), (30, 50)], {'Metafisica':(10, 30, True)},1, 'consulente', 300, 5)
+    print(obj)
     
