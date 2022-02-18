@@ -46,7 +46,6 @@ class Persona(metaclass=ABCMeta):
         return str(self._nome) + ' ' + str(self._cognome) + ' ' + str(self._data_nascita) + ' ' + str(self._sesso) + str(self._peso)
     
     def __eq__(self,other):
-        if isinstance(other):
             if other._nome==self._nome and other._cognome==self._cognome and other._data_nascita==self._data_nascita and other._sesso==self._sesso and other._peso==self._peso:
                 return True
             return False 
