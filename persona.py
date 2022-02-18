@@ -1,8 +1,69 @@
 from abc import ABCMeta, abstractmethod
 import logging
+from datetime import datetime
+
 
 logging.basicConfig(filename = 'log_es_persona.log' ,format=' %(levelname)s %(asctime) s %(message)s',level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+stipendi = {
+    "addetto_pulizia": {
+        1: 2000,
+        2: 1800,
+        3: 1700,
+        4: 1500,
+        5: 1400,
+        6: 1300,
+        7: 1200
+    },
+    "inserviente": {
+        1: 2050,
+        2: 1850,
+        3: 1750,
+        4: 1550,
+        5: 1450,
+        6: 1350,
+        7: 1250
+    },
+    "operaio": {
+        1: 2500,
+        2: 2300,
+        3: 2000,
+        4: 1900,
+        5: 1800,
+        6: 1500,
+        7: 1400
+    },
+    "fattorino": {
+        1: 2500,
+        2: 2300,
+        3: 2000,
+        4: 1900,
+        5: 1800,
+        6: 1500,
+        7: 1400
+    },
+    "Manager": {
+        1: 4000,
+        2: 3700,
+        3: 3500,
+        4: 3300,
+        5: 3000,
+        6: 2800,
+        7: 2500
+    },
+    "Driettore": {
+        1: 7000,
+        2: 6500,
+        3: 6200,
+        4: 6000,
+        5: 5800,
+        6: 5500,
+        7: 5000
+    }
+
+}
+
 
 class Persona(metaclass=ABCMeta):
     def __init__(self,nome, cognome, data_nascita, sesso, peso):
@@ -98,13 +159,6 @@ class Lavoratore(Persona, metaclass=ABCMeta):
     @abstractmethod
     def stipendio(self):
         pass
-    
-    
-from persona import Persona
-from datetime import datetime
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 class Studente(Persona):
@@ -184,6 +238,8 @@ class Studente(Persona):
         self._corso_di_studio = corso_di_studio
         self._alchool = alchool
         self._esami = esami
+        logger.info(f"Studente {self._nome} {self._cognome}, matricola {self._matricola}, iscritto al corso di studio "
+                    f"{self._corso_di_studio}")
 
     def __eq__(self, other):
         """
@@ -194,8 +250,8 @@ class Studente(Persona):
         return True if self._matricola == other.matricola else False
 
     def __str__(self):
-        return str(f"Studente {self._nome} {self._cognome}, matricola {self._matricola}, iscritto al corso di studio"
-                   f"{self._corso_di_studio}")
+        return f"Studente {self._nome} {self._cognome}, matricola {self._matricola}, iscritto al corso di studio " \
+               f"{self._corso_di_studio}"
 
     def calcolo_media_esami(self):
         """
@@ -216,19 +272,13 @@ class Studente(Persona):
         return sum_beverage * 0.008 * 1.055 / (coefficente_difusione * self._peso)
 
 
-from persona import Lavoratore
-
-
 class LavoratorePiva(Lavoratore):
     def __init__(self,nome, cognome, data_nascita, sesso, peso, idbadge, mansione,tariffa_gg, ore_lavorate):
-        super().__init__(nome, cognome, data_nascita, sesso, peso, idbadge, mansione, tariffa_gg, ore_lavorate)
+        super().__init__(nome, cognome, data_nascita, sesso, peso, idbadge, mansione)
         self._tariffa_gg=tariffa_gg
         self._ore_lavorate=ore_lavorate
         logger.info("E' stato inserito un lavoratore con P.iva.")  
 
-          
-
-        
     def __str__(self):
         return super().__str__() + ' ' + self._tariffa_gg + ' ' + self._ore_lavorate
     
@@ -258,9 +308,92 @@ class LavoratorePiva(Lavoratore):
         else:
             self._ore_lavorate=x
                  
-    
-    
     def calcola_stipendio(self):
         stipendio= sum(map(lambda x: x[0] + x[1], self._tariffa_gg.values(),self._ore_lavorate.values())) 
-        return stipendio 
-        
+        return stipendio
+
+
+class Dipendente(Lavoratore):
+
+    @staticmethod
+    def check_liv(liv):
+        if not isinstance(liv, int) or not 0 < liv <= 7:
+            raise ValueError('Inserire un livello corretto')
+
+    def __init__(self, nome, cognome, data_nascita, sesso, peso, idbadge, mansione, livello):
+        super().__init__(nome, cognome, data_nascita, sesso, peso, idbadge, mansione)
+        Dipendente.check_liv(livello)
+        self._livello = livello
+        logger.info("E' stato inserito un dipendente.")
+
+    def __str__(self):
+        return super().__str__() + ' ' + self._livello
+
+    def __eq__(self, other):
+        if isinstance(other, Dipendente):
+            if super().__eq__(other) and other._livello == self._livello:
+                return True
+        return False
+
+    def __hash__(self):
+        return hash((super().__hash__(), self._livello))
+
+    def get_livello(self):
+        return self._livello
+
+    def set_livello(self, x):
+        Dipendente.check_liv(x)
+        self._livello = x
+
+
+
+    def calcolo_stipendio(self, mansione, livl):
+        return stipendi.get(mansione).get(livl)
+
+
+class FactoryDipendenti:
+
+    @staticmethod
+    def createDipendente(tipo, *args, **kwargs):
+        if tipo == "Dipendente":
+            return Dipendente(*args, **kwargs)
+        elif tipo == "LavoratorePiva":
+            return LavoratorePiva(*args, **kwargs)
+
+
+class Check:
+
+    @staticmethod
+    def max_tasso_alcolemico(studenti):
+        tasso_alcolemico = [s.calcola_tasso_alcolemico() for s in studenti]
+        max_tasso = max(tasso_alcolemico)
+        return next(filter(lambda x: x.calcola_tasso_alcolemico() == max_tasso, studenti))
+
+        # senza lambda
+
+        # max_tasso = studenti[0].calcolo_tasso_alcolemico()
+        # studente_max = studenti[0]
+        # for s in studenti[1:]:
+        #     if s.calcola_tasso_alcolemico() > max_tasso:
+        #         studente_max = s
+        # return studente_max
+
+    @staticmethod
+    def max_media_studenti(studenti):
+        media_studenti = [s.calcolo_media_esami() for s in studenti]
+        max_media = max(media_studenti)
+        return next(filter(lambda x: x.calcolo_media_esami() == max_media, studenti))
+
+    @staticmethod
+    def is_ubriaco(studenti):
+        return False if Check.max_media_studenti(studenti) == Check.max_tasso_alcolemico(studenti) else True
+
+    @staticmethod
+    def aumento_a_livello(mansione, livello, aumento):
+        if mansione not in stipendi.keys():
+            raise ValueError("Mansione non presente.")
+        if livello not in stipendi[mansione]:
+            raise ValueError("Livello non in mansione")
+        if isinstance(aumento, int):
+            raise ValueError("Aumento deve essere di tipo intero")
+        stipendi[mansione][livello] = + aumento
