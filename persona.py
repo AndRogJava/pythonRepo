@@ -81,10 +81,10 @@ class IllegalAgeError(Exception):
 
 
 class Persona(metaclass=ABCMeta):
-    def __init__(self,nome, cognome, data_nascita, sesso, peso):
+    def __init__(self,nome, cognome,   sesso, peso, data_di_nascita):
         self._nome=nome
         self._cognome=cognome
-        self._data_nascita=data_nascita
+        self._data_nascita=data_di_nascita
         self._sesso=sesso
         self._peso=peso
         
@@ -233,8 +233,7 @@ class Studente(Persona):
             assert len(e) == 3
             assert isinstance(e[0], int) and isinstance(e[1], int) and isinstance(e[2], bool)
             assert 18 <= e[1] <= 30
-            #assert e[1] != 30 and e[3] is True
-            if e[1] != 30: 
+            if e[1] != 30:
                 assert e[2] is False
         assert isinstance(nome, str)
         assert isinstance(cognome, str)
@@ -244,13 +243,19 @@ class Studente(Persona):
             assert len(a) == 2
             assert 0 <= a[0] <= 100
 
-        super().__init__(nome, cognome,sesso,peso,data_di_nascita)
+        super().__init__(nome, cognome, sesso, peso, data_di_nascita)
         self._matricola = matricola
         self._corso_di_studio = corso_di_studio
         self._alchool = alchool
         self._esami = esami
         logger.info(f"Studente {self._nome} {self._cognome}, matricola {self._matricola}, iscritto al corso di studio "
                     f"{self._corso_di_studio}")
+
+    def __init2__(self, matricola: int, corso_di_studio: str, alchool: list, esami: dict):
+        self.matricola = matricola
+        self.corso_di_studio = corso_di_studio
+        self.alchool = alchool
+        self.esami = esami
 
     def __eq__(self, other):
         """
@@ -289,6 +294,12 @@ class LavoratorePiva(Lavoratore):
         self._tariffa_gg=tariffa_gg
         self._ore_lavorate=ore_lavorate
         logger.info("E' stato inserito un lavoratore con P.iva.")  
+
+    def __init2__(self, idbadge, mansione, tariffa_gg, ore_lavorate):
+        self.set_idbadge(idbadge)
+        self.set_mansione(mansione)
+        self.set_tariffa_gg(tariffa_gg)
+        self.set_ore_lavorate(ore_lavorate)
 
     def __str__(self):
         return super().__str__() + ' ' + self._tariffa_gg + ' ' + self._ore_lavorate
@@ -339,6 +350,12 @@ class Dipendente(Lavoratore):
         Dipendente.check_liv(livello)
         self._livello = livello
         logger.info("E' stato inserito un dipendente.")
+
+    def __init2__(self, idbadge, mansione, livello):
+        self.set_idbadge(idbadge)
+        self.set_mansione(mansione)
+        self.set_livello(livello)
+
 
     def __str__(self):
         return super().__str__() + ' ' + self._livello
@@ -416,14 +433,17 @@ class Check:
         stipendi[mansione][livello] = stipendi[mansione][livello] + aumento
 
 
-
 class Studenteiva (Studente, LavoratorePiva):
     def __init__(self, nome, cognome, sesso, peso, data_di_nascita, matricola,
                  corso_di_studio, alchool, esami, idbadge, mansione, tariffa_gg, ore_lavorate):
-        Studente.__init__(self,nome, cognome, sesso, peso, data_di_nascita, matricola,
-                          corso_di_studio, alchool, esami)
-        LavoratorePiva.__init__(self,nome, cognome, sesso, peso, data_di_nascita, idbadge, mansione, tariffa_gg, ore_lavorate)
-        
+        Persona.__init__(self, nome, cognome, sesso, peso, data_di_nascita)
+        Studente.__init2__(self, matricola, corso_di_studio, alchool, esami)
+        LavoratorePiva.__init2__(self, idbadge, mansione, tariffa_gg, ore_lavorate)
 
-        
-        
+
+class StudenteDip(Studente, Dipendente):
+    def __init__(self, nome, cognome, sesso, peso, data_di_nascita, matricola,
+                 corso_di_studio, alchool, esami, idbadge, mansione, livello):
+        Persona.__init__(self, nome, cognome, sesso, peso, data_di_nascita)
+        Studente.__init2__(self, matricola, corso_di_studio, alchool, esami)
+        Dipendente.__init2__(self, idbadge, mansione, livello)
