@@ -6,6 +6,8 @@ class LavoratorePiva(Lavoratore):
         super().__init__(nome, cognome, data_nascita, sesso, peso, idbadge, mansione, tariffa_gg, ore_lavorate)
         self._tariffa_gg=tariffa_gg
         self._ore_lavorate=ore_lavorate
+          
+
         
     def __str__(self):
         return super().__str__() + ' ' + self._tariffa_gg + ' ' + self._ore_lavorate
