@@ -5,10 +5,12 @@ logging.basicConfig(filename = 'log_es_persona.log' ,format=' %(levelname)s %(as
 logger = logging.getLogger(__name__)
 
 class Persona(metaclass=ABCMeta):
-    def __init__(self,nome, cognome, data_nascita):
+    def __init__(self,nome, cognome, data_nascita, sesso, peso):
         self._nome=nome
         self._cognome=cognome
         self._data_nascita=data_nascita
+        self.sesso=sesso
+        self.peso=peso
         
     #getter 
     def get_name(self):
@@ -19,10 +21,17 @@ class Persona(metaclass=ABCMeta):
     def get_cognome(self):
         return self._cognome
     
-     # getter 
+    # getter 
     def get_data_nscita(self):
         return self._data_nascita
     
+    # getter 
+    def get_sesso(self):
+        return self.sesso
+    
+    # getter 
+    def get_peso(self):
+        return self.peso
     
     def mangia(self):
         print('la persona sta mangiando')
@@ -34,11 +43,11 @@ class Persona(metaclass=ABCMeta):
         print('la persona sta dormendo')  
         
     def __str__(self):
-        return str(self._nome) + ' ' + str(self._cognome) + ' ' + str(self._data_nascita) 
+        return str(self._nome) + ' ' + str(self._cognome) + ' ' + str(self._data_nascita) + ' ' + str(self.sesso) + str(self.peso)
     
     def __eq__(self,other):
         if isinstance(other):
-            if other._nome==self._nome and other._cognome==self._cognome and other._data_nascita==self._data_nascita:
+            if other._nome==self._nome and other._cognome==self._cognome and other._data_nascita==self._data_nascita and other.sesso==self.sesso and other.peso==self.peso:
                 return True
             return False 
 
