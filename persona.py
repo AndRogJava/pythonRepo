@@ -54,8 +54,8 @@ class Persona(metaclass=ABCMeta):
 
 class Lavoratore(Persona, metaclass=ABCMeta):
     
-    def __init__(self,nome, cognome, data_nascita, idbadge, mansione):
-        super().__init__(nome, cognome, data_nascita)
+    def __init__(self,nome, cognome, data_nascita, sesso, peso, idbadge, mansione):
+        super().__init__(nome, cognome, data_nascita, sesso, peso)
         Lavoratore.check_id(idbadge)
         self._idbadge = idbadge
         self._mansione = mansione
@@ -95,7 +95,6 @@ class Lavoratore(Persona, metaclass=ABCMeta):
             raise('Inserisci una id valido.')
         else:
             pass
-
 
     @abstractmethod
     def stipendio(self):
