@@ -65,6 +65,21 @@ stipendi = {
 }
 
 
+class LevelError(Exception):
+    def __init__(self, msg):
+        super().__init__(msg)
+
+
+class MansioneError(Exception):
+    def __init__(self, msg):
+        super().__init__(msg)
+
+
+class IllegalAgeError(Exception):
+    def __init__(self, msg):
+        super().__init__(msg)
+
+
 class Persona(metaclass=ABCMeta):
     def __init__(self,nome, cognome, data_nascita, sesso, peso):
         self._nome=nome
@@ -116,6 +131,9 @@ class Lavoratore(Persona, metaclass=ABCMeta):
     
     def __init__(self,nome, cognome, data_nascita, sesso, peso, idbadge, mansione):
         super().__init__(nome, cognome, data_nascita, sesso, peso)
+        if data_nascita.year < 18:
+            raise IllegalAgeError("Dipendente")
+
         Lavoratore.check_id(idbadge)
         self._idbadge = idbadge
         self._mansione = mansione
@@ -318,10 +336,13 @@ class Dipendente(Lavoratore):
     @staticmethod
     def check_liv(liv):
         if not isinstance(liv, int) or not 0 < liv <= 7:
-            raise ValueError('Inserire un livello corretto')
+            raise LevelError('Inserire un livello corretto')
 
     def __init__(self, nome, cognome, data_nascita, sesso, peso, idbadge, mansione, livello):
+
         super().__init__(nome, cognome, data_nascita, sesso, peso, idbadge, mansione)
+        if mansione not in stipendi.keys():
+            raise MansioneError("Mansione non presente.")
         Dipendente.check_liv(livello)
         self._livello = livello
         logger.info("E' stato inserito un dipendente.")
@@ -344,8 +365,6 @@ class Dipendente(Lavoratore):
     def set_livello(self, x):
         Dipendente.check_liv(x)
         self._livello = x
-
-
 
     def calcolo_stipendio(self, mansione, livl):
         return stipendi.get(mansione).get(livl)
@@ -391,9 +410,9 @@ class Check:
     @staticmethod
     def aumento_a_livello(mansione, livello, aumento):
         if mansione not in stipendi.keys():
-            raise ValueError("Mansione non presente.")
+            raise MansioneError("Mansione non presente.")
         if livello not in stipendi[mansione]:
-            raise ValueError("Livello non in mansione")
+            raise LevelError("Livello non in mansione")
         if isinstance(aumento, int):
             raise ValueError("Aumento deve essere di tipo intero")
         stipendi[mansione][livello] = + aumento
