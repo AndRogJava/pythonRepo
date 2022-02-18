@@ -129,12 +129,11 @@ class Persona(metaclass=ABCMeta):
 
 class Lavoratore(Persona, metaclass=ABCMeta):
     
-    def __init__(self,nome, cognome, data_nascita, sesso, peso, idbadge, mansione):
-        super().__init__(nome, cognome, data_nascita, sesso, peso)
+    def __init__(self, nome, cognome, sesso, peso, data_nascita, idbadge, mansione):
+        super().__init__(nome, cognome, sesso, peso, data_nascita)
         if data_nascita.year < 18:
             raise IllegalAgeError("Dipendente")
 
-        Lavoratore.check_id(idbadge)
         self._idbadge = idbadge
         self._mansione = mansione
         logger.info("E' stato inserito un lavoratore.")  
@@ -155,7 +154,6 @@ class Lavoratore(Persona, metaclass=ABCMeta):
         return self._idbadge
 
     def set_idbadge(self, x):
-        Lavoratore.check_id(x)
         self._idbadge = x
     
     def get_masnione(self):
@@ -166,16 +164,9 @@ class Lavoratore(Persona, metaclass=ABCMeta):
             raise('Inserisci una mansione valida')
         else:
             self._mansione = x
-    
-    @staticmethod
-    def check_id(idbadge):
-        if (len(idbadge)<0) or (len(idbadge)>8) or (idbadge.isalnum() == False):
-            raise('Inserisci una id valido.')
-        else:
-            pass
 
     @abstractmethod
-    def stipendio(self):
+    def calcolo_stipendio(self):
         pass
 
 
@@ -242,7 +233,9 @@ class Studente(Persona):
             assert len(e) == 3
             assert isinstance(e[0], int) and isinstance(e[1], int) and isinstance(e[2], bool)
             assert 18 <= e[1] <= 30
-            assert e[1] != 30 and e[3] is True
+            #assert e[1] != 30 and e[3] is True
+            if e[1] != 30: 
+                assert e[2] is False
         assert isinstance(nome, str)
         assert isinstance(cognome, str)
         assert isinstance(data_di_nascita, datetime)
@@ -291,8 +284,8 @@ class Studente(Persona):
 
 
 class LavoratorePiva(Lavoratore):
-    def __init__(self,nome, cognome, data_nascita, sesso, peso, idbadge, mansione,tariffa_gg, ore_lavorate):
-        super().__init__(nome, cognome, data_nascita, sesso, peso, idbadge, mansione)
+    def __init__(self,nome, cognome, sesso, peso, data_nascita, idbadge, mansione, tariffa_gg, ore_lavorate):
+        super().__init__(nome, cognome, sesso, peso, data_nascita, idbadge, mansione)
         self._tariffa_gg=tariffa_gg
         self._ore_lavorate=ore_lavorate
         logger.info("E' stato inserito un lavoratore con P.iva.")  
@@ -326,7 +319,7 @@ class LavoratorePiva(Lavoratore):
         else:
             self._ore_lavorate=x
                  
-    def calcola_stipendio(self):
+    def calcolo_stipendio(self):
         stipendio= sum(map(lambda x: x[0] + x[1], self._tariffa_gg.values(),self._ore_lavorate.values())) 
         return stipendio
 
@@ -338,9 +331,9 @@ class Dipendente(Lavoratore):
         if not isinstance(liv, int) or not 0 < liv <= 7:
             raise LevelError('Inserire un livello corretto')
 
-    def __init__(self, nome, cognome, data_nascita, sesso, peso, idbadge, mansione, livello):
+    def __init__(self, nome, cognome, sesso, peso, data_nascita,  idbadge, mansione, livello):
 
-        super().__init__(nome, cognome, data_nascita, sesso, peso, idbadge, mansione)
+        super().__init__(nome, cognome, sesso, peso, data_nascita, idbadge, mansione)
         if mansione not in stipendi.keys():
             raise MansioneError("Mansione non presente.")
         Dipendente.check_liv(livello)
@@ -366,8 +359,8 @@ class Dipendente(Lavoratore):
         Dipendente.check_liv(x)
         self._livello = x
 
-    def calcolo_stipendio(self, mansione, livl):
-        return stipendi.get(mansione).get(livl)
+    def calcolo_stipendio(self):
+        return stipendi.get(self._mansione).get(self._livello)
 
 
 class FactoryDipendenti:
@@ -386,7 +379,7 @@ class Check:
     def max_tasso_alcolemico(studenti):
         tasso_alcolemico = [s.calcola_tasso_alcolemico() for s in studenti]
         max_tasso = max(tasso_alcolemico)
-        return next(filter(lambda x: x.calcola_tasso_alcolemico() == max_tasso, studenti))
+        return list(filter(lambda x: x.calcola_tasso_alcolemico() == max_tasso, studenti))
 
         # senza lambda
 
@@ -401,11 +394,16 @@ class Check:
     def max_media_studenti(studenti):
         media_studenti = [s.calcolo_media_esami() for s in studenti]
         max_media = max(media_studenti)
-        return next(filter(lambda x: x.calcolo_media_esami() == max_media, studenti))
+        return list(filter(lambda x: x.calcolo_media_esami() == max_media, studenti)) 
 
     @staticmethod
     def is_ubriaco(studenti):
-        return False if Check.max_media_studenti(studenti) == Check.max_tasso_alcolemico(studenti) else True
+        ubriaco =  True
+        tasso_max = Check.max_tasso_alcolemico(studenti)
+        for s in Check.max_media_studenti(studenti):
+            if s in tasso_max:
+                ubriaco = False
+        return ubriaco
 
     @staticmethod
     def aumento_a_livello(mansione, livello, aumento):
@@ -413,6 +411,6 @@ class Check:
             raise MansioneError("Mansione non presente.")
         if livello not in stipendi[mansione]:
             raise LevelError("Livello non in mansione")
-        if isinstance(aumento, int):
+        if not isinstance(aumento, int):
             raise ValueError("Aumento deve essere di tipo intero")
-        stipendi[mansione][livello] = + aumento
+        stipendi[mansione][livello] = stipendi[mansione][livello] + aumento
